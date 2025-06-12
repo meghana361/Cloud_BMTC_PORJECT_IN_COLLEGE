@@ -1,0 +1,21 @@
+{
+  "name": "bus-stops-prisma",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "generate": "prisma generate",
+    "migrate": "prisma migrate deploy"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
+    "express": "^5.1.0",
+    "mysql2": "^3.14.1",
+    "prisma": "^6.9.0"
+  }
+}
