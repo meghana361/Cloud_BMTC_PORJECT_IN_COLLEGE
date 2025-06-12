@@ -2,11 +2,11 @@
   "name": "bus-stops-prisma",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {
-    "start": "node server.js",
-    "generate": "prisma generate",
-    "migrate": "prisma migrate deploy"
-  },
+ "scripts": {
+  "start": "node server.js",
+  "dev": "nodemon server.js"
+}
+,
   "keywords": [],
   "author": "",
   "license": "ISC",
