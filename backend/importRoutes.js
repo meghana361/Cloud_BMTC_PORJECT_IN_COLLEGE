@@ -15,11 +15,10 @@ async function main() {
       .on('data', (data) => {
         totalRows++;
         try {
-          // Fix double quotes and parse JSON fields
+  
           data.trip_list = JSON.parse(data.trip_list.replace(/""/g, '"'));
           data.stop_list = JSON.parse(data.stop_list.replace(/""/g, '"'));
 
-          // Convert to correct types
           data.trip_count = parseInt(data.trip_count);
           data.stop_count = parseInt(data.stop_count);
           data.id = data.id.toString();

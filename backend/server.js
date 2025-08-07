@@ -1,34 +1,41 @@
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
-
+const db = require('./db'); 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: '*', // or restrict to 'http://localhost:3000' or your deployed frontend URL
+  methods: ['GET'],
+}));
 
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'root', // your actual MySQL password
-  database: 'busstops_db'
-});
+require('dotenv').config();
 
-// GET /routes?from=A&to=B
-app.get('/routes', (req, res) => {
+// const db = mysql.createConnection({
+//   host: 'localhost',
+//   user: 'root',
+//   password: 'root', 
+//   database: 'busstops_db'
+// });
+// const db = mysql.createConnection({
+//   host: process.env.DB_HOST,
+//   user: process.env.DB_USER,
+//   password: process.env.DB_PASS,
+//   database: process.env.DB_NAME
+// });
+
+
+app.get('/routes', async (req, res) => {
   const { from, to } = req.query;
 
   if (!from || !to) {
     return res.status(400).json({ error: 'from and to query params required' });
   }
 
-  db.query('SELECT * FROM Route', (err, results) => {
-    if (err) {
-      console.error('Error fetching routes:', err);
-      return res.status(500).json({ error: 'Server error' });
-    }
+  try {
+    const [results] = await db.query('SELECT * FROM Route'); // ✅ FIXED
 
     const matchingRoutes = results
       .map(route => {
-        // Convert buffer to string and split
         const stopListRaw = route.stop_list?.toString('utf8') || '';
         const stopList = stopListRaw.split(',').map(s => s.trim());
 
@@ -42,45 +49,44 @@ app.get('/routes', (req, res) => {
             direction_id: route.direction_id,
             hops: stopList.slice(fromIndex, toIndex + 1)
           };
-        } else {
-          return null; // No match
         }
+        return null;
       })
       .filter(route => route !== null);
 
     res.json(matchingRoutes);
-  });
+  } catch (err) {
+    console.error('Error fetching routes:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-
-
-// GET /stops
-app.get('/stops', (req, res) => {
-  db.query('SELECT stop_list FROM Route', (err, results) => {
-    if (err) {
-      console.error('Error fetching stops:', err);
-      return res.status(500).json({ error: 'Failed to fetch stops' });
-    }
+app.get('/stops', async (req, res) => {
+  try {
+    const [results] = await db.query('SELECT stop_list FROM Route'); // ✅ FIXED
 
     const allStops = new Set();
 
     results.forEach(route => {
-      // Convert buffer to string and split by commas
       const stopListRaw = route.stop_list?.toString('utf8') || '';
       const stopList = stopListRaw.split(',').map(s => s.trim());
 
       stopList.forEach(stop => {
-        if (stop) {
-          allStops.add(stop);
-        }
+        if (stop) allStops.add(stop);
       });
     });
 
     res.json(Array.from(allStops));
-  });
+  } catch (err) {
+    console.error('Error fetching stops:', err);
+    res.status(500).json({ error: 'Failed to fetch stops' });
+  }
 });
 
-const PORT = 5000;
-app.listen(PORT, () => {
+
+const PORT = process.env.PORT || 8080; // ✅ CHANGE THIS
+
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 API running on http://localhost:${PORT}`);
 });
+

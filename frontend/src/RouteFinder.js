@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const apiUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+const apiUrl = process.env.REACT_APP_BACKEND_URL;
 
 const RouteFinder = () => {
   const [source, setSource] = useState('');
@@ -92,7 +92,7 @@ const RouteFinder = () => {
       </div>
 
       <div style={layoutWrapperStyle}>
-        {/* Main Card */}
+
         <div style={cardStyle}>
           <h2 style={titleStyle}>Search for Bus Routes</h2>
 
@@ -162,7 +162,7 @@ const RouteFinder = () => {
           )}
         </div>
 
-        {/* Tips Box */}
+
         <div style={tipsStyle}>
           <h3 style={{ marginBottom: '10px', color: '#004d40' }}>🔍 Tips for Searching</h3>
           <ul style={{ paddingLeft: '20px', fontSize: '14px', lineHeight: '1.6' }}>
@@ -180,7 +180,6 @@ const RouteFinder = () => {
   );
 };
 
-// --- Styling ---
 const pageStyle = {
   background: 'linear-gradient(to right, #e0f7fa, #f1f8e9)',
   minHeight: '100vh',
@@ -212,7 +211,7 @@ const layoutWrapperStyle = {
   gap: '30px',
   alignItems: 'flex-start',
   justifyContent: 'center',
-  flexWrap: 'wrap', // Responsive on small screens
+  flexWrap: 'wrap'
 };
 
 const cardStyle = {
