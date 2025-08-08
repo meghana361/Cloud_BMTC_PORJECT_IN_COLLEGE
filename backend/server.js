@@ -1,28 +1,23 @@
 const express = require('express');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise'); // ✅ USE PROMISE VERSION
 const cors = require('cors');
-const db = require('./db'); 
+require('dotenv').config();
+
 const app = express();
 app.use(cors({
-  origin: '*', // or restrict to 'http://localhost:3000' or your deployed frontend URL
+  origin: '*',
   methods: ['GET'],
 }));
 
-require('dotenv').config();
-
-// const db = mysql.createConnection({
-//   host: 'localhost',
-//   user: 'root',
-//   password: 'root', 
-//   database: 'busstops_db'
-// });
-// const db = mysql.createConnection({
-//   host: process.env.DB_HOST,
-//   user: process.env.DB_USER,
-//   password: process.env.DB_PASS,
-//   database: process.env.DB_NAME
-// });
-
+const db = mysql.createPool({ // ✅ use createPool
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
 app.get('/routes', async (req, res) => {
   const { from, to } = req.query;
@@ -32,7 +27,7 @@ app.get('/routes', async (req, res) => {
   }
 
   try {
-    const [results] = await db.query('SELECT * FROM Route'); // ✅ FIXED
+    const [results] = await db.query('SELECT * FROM Route');
 
     const matchingRoutes = results
       .map(route => {
@@ -63,14 +58,13 @@ app.get('/routes', async (req, res) => {
 
 app.get('/stops', async (req, res) => {
   try {
-    const [results] = await db.query('SELECT stop_list FROM Route'); // ✅ FIXED
+    const [results] = await db.query('SELECT stop_list FROM Route');
 
     const allStops = new Set();
 
     results.forEach(route => {
       const stopListRaw = route.stop_list?.toString('utf8') || '';
       const stopList = stopListRaw.split(',').map(s => s.trim());
-
       stopList.forEach(stop => {
         if (stop) allStops.add(stop);
       });
@@ -83,10 +77,7 @@ app.get('/stops', async (req, res) => {
   }
 });
 
-
-const PORT = process.env.PORT || 8080; // ✅ CHANGE THIS
-
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 API running on http://localhost:${PORT}`);
 });
-
